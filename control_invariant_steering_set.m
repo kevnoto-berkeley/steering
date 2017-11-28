@@ -30,10 +30,12 @@ poly = {};
 poly{1} = Polyhedron('lb',zl(2:4),'ub',zu(2:4));
 %%
 N = 10;
-parfor delta_psi = [0,degtorad(5),degtorad(10)]
+delta_psis = [0,degtorad(5),degtorad(10)];
+for counter = 1:3
+    delta_psi = delta_psis(counter);
     for n = 1:N
         fprintf("Iteration: %d\n", n)
-        feas{n} = [];
+        feas{counter,n} = [];
         A = poly{n}.H(:,1:3);
         b = poly{n}.H(:,4);
         for i = 1:numel(x_grid)
@@ -43,17 +45,17 @@ parfor delta_psi = [0,degtorad(5),degtorad(10)]
                         z = [0;x_grid(i);psi_grid(j);v_grid(k)];
                         z_next = CMC_w_accel(z,[u;0],dt,delta_psi);
                         if all(A * z_next(2:4) <= b)
-                            feas{n} = [feas{n}, z];
+                            feas{counter,n} = [feas{counter,n}, z];
                             break
                         end
                     end
                 end
             end
         end
-        z2_points = feas{n}(2,:)';
-        z3_points = feas{n}(3,:)';
-        z4_points = feas{n}(4,:)';
-        points = feas{n}(2:4,:)';
+        z2_points = feas{counter,n}(2,:)';
+        z3_points = feas{counter,n}(3,:)';
+        z4_points = feas{counter,n}(4,:)';
+        points = feas{counter,n}(2:4,:)';
         id = convhull(points);
         id = unique(id);
         points = points(id,:);
